@@ -111,3 +111,5 @@ tools/check.sh
 ```
 
 See [architecture and interfaces](docs/architecture.md), [operations](docs/operations.md), and [release acceptance](docs/acceptance.md).
+
+GitHub Actions runs checks on pushes and pull requests and builds downloadable ZIP artifacts. To publish a release, update the extension version and changelog, then push a matching `vMAJOR.MINOR.PATCH` tag. See [GitHub checks and releases](docs/releases.md) for the workflow and requirements.

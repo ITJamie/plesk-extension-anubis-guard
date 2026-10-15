@@ -11,7 +11,9 @@ import tempfile
 import zipfile
 
 BASE = Path(__file__).resolve().parent.parent
-VERSION = "0.8.1"
+from metadata import version
+
+VERSION = version()
 sys.path.insert(0, str(BASE / "src/sbin"))
 from ag_payload import digest, download as download_runtime, extract_runtime, manifest
 

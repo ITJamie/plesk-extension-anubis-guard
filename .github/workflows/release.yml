@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publish GitHub release
+    needs: checks
+    if: github.repository == 'ITJamie/plesk-extension-anubis-guard'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Validate tag and build release assets
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 tools/release.py --tag "$RELEASE_TAG"
+          cd dist
+          sha256sum --check *.sha256
+      - name: Create release with ZIPs and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/*.zip dist/*.sha256 \
+            --verify-tag \
+            --title "Anubis Guard ${RELEASE_TAG#v}" \
+            --notes-file dist/release-notes.md

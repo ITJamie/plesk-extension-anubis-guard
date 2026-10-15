@@ -2,6 +2,8 @@
 
 ## 0.8.1 — keep website pages focused
 
+- Add GitHub Actions checks, downloadable ZIP artifacts, and tested tag-driven GitHub releases with changelog notes and checksums. Read package versions directly from extension metadata.
+
 - Show server-wide runtime and GeoIP controls only on the administrator's main extension page. Website-specific pages retain site controls for administrators and authorized customers.
 - Verify actual template rendering for administrator/customer and main/site entry points.
 

@@ -9,6 +9,7 @@ import unittest
 import zipfile
 
 BASE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(BASE / "tools"))
 spec = importlib.util.spec_from_file_location("build", BASE / "tools/build.py")
 build = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(build)

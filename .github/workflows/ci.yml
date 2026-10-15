@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Python ${{ matrix.python }} / PHP / frontend / nginx
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.13']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install native test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends nginx libmaxminddb-bin php-cli php-xml
+          # These tests mock ownership changes but resolve the real group/user IDs.
+          getent group nginx || sudo groupadd --system nginx
+          id plesk-anubis || sudo useradd --system --user-group --no-create-home plesk-anubis
+          command -v nginx
+          command -v mmdblookup
+      - name: Run checks
+        env:
+          PHP_BIN: php
+          NODE_BIN: node
+        run: sh tools/check.sh
+
+  packages:
+    name: Build release ZIPs
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Build and verify packages
+        run: |
+          python3 tools/build.py
+          python3 tools/build.py --source-only
+          cd dist
+          sha256sum --check *.sha256
+      - uses: actions/upload-artifact@v7
+        with:
+          name: extension-packages
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 14
