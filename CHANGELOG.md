@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.2
+
+ci fixes
+
 ## 0.8.1 — keep website pages focused
 
 - Add GitHub Actions checks, downloadable ZIP artifacts, and tested tag-driven GitHub releases with changelog notes and checksums. Read package versions directly from extension metadata.
