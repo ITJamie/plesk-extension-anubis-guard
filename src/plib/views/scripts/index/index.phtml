@@ -1,0 +1,127 @@
+<div id="anubis-guard" data-base-url="<?= $this->escape($this->baseUrl) ?>" data-csrf="<?= $this->escape($this->csrf) ?>" data-domain-id="<?= $this->escape($this->domainId) ?>">
+    <p>Manage Anubis bot protection for your websites. When protection is enabled, visitors may need to complete a browser challenge.</p>
+    <p>Path and IP exclusions allow requests through without a challenge. Aliases use their hosting domain’s settings.</p>
+    <div id="ag-message" role="status" aria-live="polite"></div>
+    <?php if ($this->isAdmin && $this->domainId === ''): ?>
+    <section id="ag-runtime" class="ag-domain" aria-label="Server-wide Anubis runtime">
+        <h3>Anubis runtime</h3>
+        <p>Automatic follows the version pinned by this extension. An override remains selected across extension upgrades. Downloads do not activate a runtime. Switching affects every protected site and briefly restarts its Anubis service; each site's failure setting applies.</p>
+        <p>Only official stable Linux amd64 releases with a GitHub SHA-256 digest are listed. Startup probes check current policies before activation; complete upstream compatibility is not guaranteed. The extension's bot rules stay unchanged, and switching versions may require fresh visitor challenges.</p>
+        <div class="ag-fields">
+            <label>GitHub release
+                <select id="ag-runtime-release" aria-label="Available Anubis releases"></select>
+            </label>
+            <label>Downloaded runtime
+                <select id="ag-runtime-downloaded" aria-label="Downloaded Anubis versions"></select>
+            </label>
+        </div>
+        <p>
+            <button type="button" id="ag-runtime-releases">Refresh releases</button>
+            <button type="button" id="ag-runtime-more">Load older releases</button>
+            <button type="button" id="ag-runtime-download">Download selected release</button>
+            <button type="button" id="ag-runtime-activate">Activate downloaded runtime</button>
+            <button type="button" id="ag-runtime-auto">Use automatic</button>
+            <button type="button" id="ag-runtime-rollback">Roll back</button>
+            <button type="button" id="ag-runtime-inspect">Refresh runtime status</button>
+        </p>
+        <pre id="ag-runtime-status" role="status" aria-live="polite">Loading runtime status…</pre>
+    </section>
+    <section id="ag-geoip" class="ag-domain" aria-label="Server-wide GeoIP databases">
+        <h3>Server-wide GeoIP databases</h3>
+        <p>Used by country and network (ASN) rules on all protected sites. Enabling databases activates these built-in rules. Updates may briefly restart each site's Anubis service; its failure setting applies.</p>
+        <form id="ag-geoip-form" autocomplete="off">
+            <label>Database source
+                <select name="mode">
+                    <option value="disabled">Disabled — skip country and ASN rules</option>
+                    <option value="maxmind">Download from MaxMind</option>
+                    <option value="local">Use local database files</option>
+                </select>
+            </label>
+            <fieldset class="ag-geoip-maxmind">
+                <legend>MaxMind credentials</legend>
+                <label>Account ID <input name="account_id" type="text" inputmode="numeric" maxlength="20"></label>
+                <label>License key <input name="license_key" type="password" maxlength="256" autocomplete="new-password">
+                    <span class="ag-geoip-key-status">Leave blank to retain the saved key.</span>
+                </label>
+                <p>Download GeoLite2 Country and ASN databases once a day using your MaxMind account. The key is never displayed after saving.</p>
+            </fieldset>
+            <label><input name="clear_key" type="checkbox"> Clear the saved license key (choose Disabled or Local first)</label>
+            <fieldset class="ag-geoip-local">
+                <legend>Local database paths</legend>
+                <label>Country MMDB path or pattern <input name="country_path" type="text" placeholder="/srv/geoip/*/GeoLite2-Country.mmdb"></label>
+                <label>ASN MMDB path or pattern <input name="asn_path" type="text" placeholder="/srv/geoip/GeoLite2-ASN_*.mmdb"></label>
+                <p>Absolute file paths; * can match a filename or folder component. The newest valid database is selected by its internal build date, with filename as a tie-breaker. Recursive ** is not supported. Sources are checked every five minutes and are never modified.</p>
+            </fieldset>
+            <button type="submit">Save GeoIP settings</button>
+            <button type="button" id="ag-geoip-refresh">Refresh databases now</button>
+            <button type="button" id="ag-geoip-status-refresh">Refresh GeoIP status</button>
+        </form>
+        <pre id="ag-geoip-status" role="status" aria-live="polite">Loading GeoIP status…</pre>
+    </section>
+    <?php endif; ?>
+    <button type="button" id="ag-refresh">Refresh status</button>
+    <div id="ag-domains" aria-busy="true">Loading websites…</div>
+    <template id="ag-domain-template">
+        <form class="ag-domain">
+            <h3 class="ag-name"></h3>
+            <p class="ag-status"></p>
+            <label><input type="checkbox" name="enabled"> Enable Anubis protection</label>
+            <div class="ag-fields">
+                <label>Challenge images
+                    <select name="image_style">
+                        <option value="original">Anubis artwork (default)</option>
+                        <option value="generic">Generic status icons</option>
+                    </select>
+                    <span>Replace the checking, success, and rejection images with neutral shield icons. If your browser has cached the previous images, use a hard refresh or a private window after saving.</span>
+                </label>
+            </div>
+            <div class="ag-fields">
+                <label>Protect
+                    <select name="protection_scope">
+                        <option value="all">Entire site (default)</option>
+                        <option value="selected">Only selected paths</option>
+                    </select>
+                    <span>Selected paths protect only the listed sections. Other URLs bypass Anubis, including during an outage.</span>
+                </label>
+                <label>Protected paths and subpaths
+                    <textarea name="included_paths" rows="3" spellcheck="false" placeholder="/forums/*"></textarea>
+                    <span>One per line. /forums, /forums/, and /forums/* all protect /forums and everything below /forums/, but not /forums-other. Case-sensitive; arbitrary wildcards are not supported. Exclusions still take priority.</span>
+                </label>
+            </div>
+            <div class="ag-fields">
+                <label>If Anubis is unavailable
+                    <select name="failure_mode">
+                        <option value="closed">Fail closed — block access (default)</option>
+                        <option value="open">Fail open — serve the site without bot protection</option>
+                    </select>
+                    <span>Fail closed returns HTTP 503 when Anubis cannot be reached. Fail open uses the site's private backend on connection errors or timeouts, before a response has started. Challenge and denial responses never trigger bypass. Requests already sent may not be retryable.</span>
+                </label>
+            </div>
+            <div class="ag-fields">
+                <label>Challenge mode
+                    <select name="challenge_mode">
+                        <option value="adaptive">Adaptive (recommended)</option>
+                        <option value="proof-of-work">Fixed proof of work (JavaScript required)</option>
+                        <option value="metarefresh">Lightweight browser refresh</option>
+                    </select>
+                    <span class="ag-challenge-help"></span>
+                </label>
+                <label>Proof-of-work base difficulty
+                    <input type="number" name="difficulty" min="1" max="6" step="1" required value="2">
+                    <span>1–6; default 2. Each step requires roughly 16 times more work. Higher values can cause long waits on mobile devices.</span>
+                </label>
+            </div>
+            <p>Exclusions and built-in allow, deny, and explicit challenge rules take priority over these settings. Existing visitor tokens may remain valid until they expire.</p>
+            <div class="ag-fields">
+                <label>Excluded path prefixes <span>One per line, for example /api/webhooks/</span>
+                    <textarea name="paths" rows="3" spellcheck="false"></textarea>
+                </label>
+                <label>Excluded IP addresses or networks <span>One IPv4/IPv6 address or CIDR per line</span>
+                    <textarea name="ips" rows="3" spellcheck="false"></textarea>
+                </label>
+            </div>
+            <p class="ag-error" role="alert"></p>
+            <button type="submit">Save settings</button>
+        </form>
+    </template>
+</div>

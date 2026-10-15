@@ -1,0 +1,17 @@
+#anubis-guard { max-width: 1050px; }
+#anubis-guard .ag-domain { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 4px; }
+#anubis-guard h3 { margin: 0 0 8px; }
+#anubis-guard .ag-fields { display: flex; flex-wrap: wrap; gap: 24px; margin: 18px 0; }
+#anubis-guard .ag-fields label { flex: 1 1 300px; }
+#anubis-guard label span { display: block; font-size: 12px; color: #555; margin: 4px 0; }
+#anubis-guard textarea { box-sizing: border-box; display: block; width: 100%; padding: 8px; }
+#anubis-guard select, #anubis-guard input[type="number"] { box-sizing: border-box; display: block; max-width: 100%; padding: 6px; margin: 6px 0; }
+#anubis-guard .ag-error { color: #a32121; white-space: pre-wrap; }
+#anubis-guard #ag-message { padding: 10px 0; }
+#anubis-guard button { cursor: pointer; padding: 6px 12px; }
+#anubis-guard button:disabled { cursor: wait; }
+#anubis-guard #ag-geoip input[type="text"], #anubis-guard #ag-geoip input[type="password"] { display: block; box-sizing: border-box; width: 100%; max-width: 650px; padding: 6px; margin: 6px 0; }
+#anubis-guard #ag-geoip fieldset { margin: 16px 0; border: 1px solid #ccc; }
+#anubis-guard #ag-geoip [hidden] { display: none; }
+#anubis-guard #ag-geoip-status { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+#anubis-guard #ag-runtime-status { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }

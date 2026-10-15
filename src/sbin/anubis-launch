@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+"""Unprivileged launcher: root-owned environment pairs runtime and policy versions."""
+import os
+from pathlib import Path
+import re
+
+version = os.environ.get("ANUBIS_RUNTIME_VERSION", "")
+if not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", version):
+    raise SystemExit("Missing or invalid service runtime version; reconcile Anubis Guard")
+binary = Path(__file__).resolve().parent / version / "bin/anubis"
+os.execv(str(binary), [str(binary)])

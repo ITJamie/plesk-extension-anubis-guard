@@ -1,0 +1,24 @@
+/dist/
+/.cache/
+__pycache__/
+*.pyc
+
+# Local credentials and private keys; keep documented environment templates.
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+signing-key
+credentials.json
+
+# Downloaded runtime payloads and local operational data.
+/src/sbin/runtime/
+/src/sbin/runtime-manifest.json
+*.mmdb
+*.bdb
+*.log
+*.tar.gz
+
+# Keep src/htdocs/dist/: those panel assets are required source files.
