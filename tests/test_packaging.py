@@ -22,6 +22,7 @@ class PackagingTests(unittest.TestCase):
             build.build(source_only=True, output_dir=temp)
             self.assertEqual(path.read_bytes(), before)
             with zipfile.ZipFile(path) as package:
+                self.assertEqual(package.read("LICENSE"), (BASE / "LICENSE").read_bytes())
                 self.assertIn("src/htdocs/dist/app.js", package.namelist())
                 self.assertIn("tests/test_core.py", package.namelist())
                 self.assertFalse(any("__pycache__" in n or n.startswith("dist/") for n in package.namelist()))
@@ -30,6 +31,7 @@ class PackagingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             path = build.build(output_dir=temp)
             with zipfile.ZipFile(path) as package:
+                self.assertEqual(package.read("LICENSE"), (BASE / "LICENSE").read_bytes())
                 self.assertIn("sbin/runtime.lock.json", package.namelist())
                 self.assertIn("sbin/ag_payload.py", package.namelist())
                 self.assertIn("sbin/ag_geoip.py", package.namelist())

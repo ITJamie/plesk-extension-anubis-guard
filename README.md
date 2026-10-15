@@ -4,6 +4,8 @@ A Plesk extension for enabling Anubis per website, with literal path-prefix and 
 
 This is an independent, unofficial extension. Its author has no affiliation with the Anubis project, Techaro, or Plesk. It is not developed, sponsored, endorsed, or supported by those projects or organizations. Anubis is developed and maintained by its upstream authors; issues with this extension should be reported to this repository.
 
+Licensed under the [MIT License](LICENSE). Upstream components retain their own copyright and license notices; see [third-party notices](THIRD_PARTY_NOTICES.md).
+
 Each site also has a **Challenge images** selector: keep **Anubis artwork** (the default) or choose **Generic status icons** for neutral checking, success, and rejection shields. This replaces the three visitor-facing image responses without modifying Anubis's runtime files. After saving, hard-refresh the challenge page or use a private window if the browser cached the previous artwork. The setting is available to administrators and authorized site managers; custom uploads and arbitrary image paths are not part of this option.
 
 Administrators can configure shared **GeoIP Country and ASN databases** using MaxMind credentials or local file paths with `*` patterns. GeoIP defaults to disabled, removing database-dependent rule warnings without requiring credentials. See [GeoIP setup and recovery](docs/geoip.md).

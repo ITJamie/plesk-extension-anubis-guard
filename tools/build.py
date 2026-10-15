@@ -53,7 +53,7 @@ def build(runtime_archive=None, download=False, source_only=False, output_dir=No
                 extract_runtime(Path(runtime_archive), runtime, lock["sha256"])
                 (staging / "sbin/runtime-manifest.json").write_text(json.dumps(manifest(runtime, lock), indent=2) + "\n")
             shutil.copy2(BASE / "runtime.lock.json", staging / "sbin/runtime.lock.json")
-            for name in ("README.md", "THIRD_PARTY_NOTICES.md", "CHANGELOG.md", "runtime.lock.json"):
+            for name in ("LICENSE", "README.md", "THIRD_PARTY_NOTICES.md", "CHANGELOG.md", "runtime.lock.json"):
                 shutil.copy2(BASE / name, staging / name)
             shutil.copytree(BASE / "docs", staging / "docs")
             suffix = "-offline" if runtime_archive else ""
