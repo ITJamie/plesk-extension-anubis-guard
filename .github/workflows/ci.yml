@@ -33,7 +33,7 @@ jobs:
       - name: Install native test dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends nginx libmaxminddb-bin php-cli php-xml
+          sudo apt-get install --yes --no-install-recommends nginx mmdb-bin php-cli php-xml
           # These tests mock ownership changes but resolve the real group/user IDs.
           getent group nginx || sudo groupadd --system nginx
           id plesk-anubis || sudo useradd --system --user-group --no-create-home plesk-anubis
