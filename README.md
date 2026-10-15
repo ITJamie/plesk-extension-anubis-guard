@@ -45,7 +45,7 @@ Anubis **1.28.1 linux-amd64** is pinned in `runtime.lock.json`, including its up
 python3 tools/build.py
 ```
 
-Output: `dist/anubis-guard-0.8.2.zip` and its SHA-256 file. On installation, the helper downloads that exact GitHub release over HTTPS, checks its SHA-256 before extracting or executing it, and caches an immutable version under `/var/lib/plesk-anubis/runtime/`. A failed download or checksum mismatch aborts before changing services or website routing. The cached runtime is reused; there are no request-time downloads or automatic tracking of `latest`.
+Output: `dist/anubis-guard-0.8.3.zip` and its SHA-256 file. On installation, the helper downloads that exact GitHub release over HTTPS, checks its SHA-256 before extracting or executing it, and caches an immutable version under `/var/lib/plesk-anubis/runtime/`. A failed download or checksum mismatch aborts before changing services or website routing. The cached runtime is reused; there are no request-time downloads or automatic tracking of `latest`.
 
 For an offline installer, bundle the verified upstream release:
 
@@ -59,7 +59,7 @@ Or download the archive on another machine and build offline:
 python3 tools/build.py --runtime-archive /path/to/anubis-1.28.1-linux-amd64.tar.gz
 ```
 
-These options produce `dist/anubis-guard-0.8.2-offline.zip`, retaining the complete upstream runtime archive contents and integrity manifest. ZIP paths, timestamps, permissions, and ordering are deterministic.
+These options produce `dist/anubis-guard-0.8.3-offline.zip`, retaining the complete upstream runtime archive contents and integrity manifest. ZIP paths, timestamps, permissions, and ordering are deterministic.
 
 This workspace cannot resolve external hosts from the shell, so the binary payload and live download could not be tested here. A reproducible, **non-installable source archive** is also available:
 
@@ -72,7 +72,7 @@ python3 tools/build.py --source-only
 After building a release ZIP and completing the staging acceptance checks, install it through **Extensions → My Extensions → Upload Extension**, or as root:
 
 ```sh
-plesk bin extension --install /path/to/anubis-guard-0.8.2.zip
+plesk bin extension --install /path/to/anubis-guard-0.8.3.zip
 ```
 
 Administrators open **Extensions → Anubis Guard**. Customers use **Anubis Guard** in the hosting panel navigation or the website's Security section. The domain button opens that website's controls; the navigation entry lists all sites the account is authorized to manage. New websites start disabled. Enable a site, optionally add exclusions, and save. Aliases inherit the hosting domain's configuration; independently hosted subdomains appear separately.
@@ -88,7 +88,7 @@ Revoking the permission hides customer entry points where applicable and prevent
 To upgrade an existing installation:
 
 ```sh
-plesk bin extension --upgrade /root/git/extension/dist/anubis-guard-0.8.2.zip
+plesk bin extension --upgrade /root/git/extension/dist/anubis-guard-0.8.3.zip
 ```
 
 Refresh the panel after upgrading. Validate the customer/plan checks in `docs/acceptance.md` using separate customer accounts before broader rollout.

@@ -1,6 +1,7 @@
 """Runtime selection tests use immutable synthetic binaries; no services run."""
 import copy
 import fcntl
+import io
 import json
 import os
 from pathlib import Path
@@ -49,6 +50,26 @@ class ReleaseTests(unittest.TestCase):
         for url in ("http://github.com/file", "https://evil.example/file", "https://user@github.com/file", "https://github.com:444/file"):
             with self.subTest(url=url), self.assertRaises(ValueError):
                 handler.redirect_request(request, None, 302, "", {}, url)
+
+
+    def test_api_accepts_response_larger_than_previous_two_megabyte_limit(self):
+        record = release()
+        record["body"] = "x" * (2 * 1024 * 1024)
+        response = io.BytesIO(json.dumps([record]).encode())
+        response.headers = {"ETag": '"large"'}
+        with patch.object(ag_versions.urllib.request, "build_opener") as opener:
+            opener.return_value.open.return_value = response
+            data, etag = ag_versions.github("/releases?per_page=10&page=1")
+        self.assertEqual(data[0]["tag_name"], "v1.29.0")
+        self.assertEqual(etag, '"large"')
+
+    def test_api_response_remains_bounded(self):
+        response = io.BytesIO(b" " * (ag_versions.MAX_API_RESPONSE + 1))
+        response.headers = {}
+        with patch.object(ag_versions.urllib.request, "build_opener") as opener:
+            opener.return_value.open.return_value = response
+            with self.assertRaisesRegex(GuardError, "response is too large"):
+                ag_versions.github("/releases?per_page=10&page=1")
 
 
 class VersionTests(unittest.TestCase):
@@ -121,12 +142,40 @@ class VersionTests(unittest.TestCase):
         self.assertEqual(len(self.manager.status()["pages"]["1"]["releases"]), 1)
         with patch.object(ag_versions, "github", return_value=(None, '"etag"')) as github:
             self.manager.refresh(1)
-            github.assert_called_once_with("/releases?per_page=50&page=1", '"etag"')
+            github.assert_called_once_with("/releases?per_page=10&page=1", '"etag"')
         before = self.manager.catalog_path.read_bytes()
         with patch.object(ag_versions, "github", side_effect=GuardError("GitHub HTTP 403")):
             with self.assertRaises(GuardError):
                 self.manager.refresh(2)
         self.assertEqual(self.manager.catalog_path.read_bytes(), before)
+
+    def test_smaller_pages_keep_pagination_after_filtering_and_reuse_etags(self):
+        records = [release("1.29." + str(i)) for i in range(ag_versions.RELEASE_PAGE_SIZE)]
+        records[0]["prerelease"] = True
+        with patch.object(ag_versions, "github", return_value=(records, '"page-one"')) as request:
+            self.manager.refresh(1)
+            request.assert_called_once_with("/releases?per_page=10&page=1", None)
+        page = self.manager.status()["pages"]["1"]
+        self.assertTrue(page["has_more"])
+        self.assertEqual(len(page["releases"]), 9)
+        with patch.object(ag_versions, "github", return_value=([], '"page-two"')) as request:
+            self.manager.refresh(2)
+            request.assert_called_once_with("/releases?per_page=10&page=2", None)
+        self.assertFalse(self.manager.status()["pages"]["2"]["has_more"])
+
+    def test_pagination_upgrade_replaces_old_etags_only_after_success(self):
+        old = {"pages": {"1": {"releases": [], "etag": '"old"', "has_more": True},
+                         "2": {"releases": [], "etag": '"old-two"', "has_more": False}}}
+        atomic(self.manager.catalog_path, json.dumps(old))
+        before = self.manager.catalog_path.read_bytes()
+        with patch.object(ag_versions, "github", side_effect=GuardError("offline")):
+            with self.assertRaises(GuardError):
+                self.manager.refresh(1)
+        self.assertEqual(self.manager.catalog_path.read_bytes(), before)
+        with patch.object(ag_versions, "github", return_value=([release()], '"new"')) as request:
+            self.manager.refresh(1)
+            request.assert_called_once_with("/releases?per_page=10&page=1", None)
+        self.assertEqual(list(self.manager.status()["pages"]), ["1"])
 
     def test_switch_and_return_to_automatic_without_web_server_changes(self):
         self.make_cache(self.future)

@@ -19,7 +19,7 @@ class IndexController extends pm_Controller_Action
         }
         $this->view->domainId = $siteId === null ? '' : (string) $siteId;
         $this->view->csrf = Modules_AnubisGuard_Csrf::token();
-        $this->view->headLink()->appendStylesheet(pm_Context::getBaseUrl() . 'dist/app.css?v=0.8.2');
-        $this->view->headScript()->appendFile(pm_Context::getBaseUrl() . 'dist/app.js?v=0.8.2');
+        $this->view->headLink()->appendStylesheet(pm_Context::getBaseUrl() . 'dist/app.css?v=0.8.3');
+        $this->view->headScript()->appendFile(pm_Context::getBaseUrl() . 'dist/app.js?v=0.8.3');
     }
 }

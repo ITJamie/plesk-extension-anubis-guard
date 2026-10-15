@@ -3,7 +3,7 @@
   <id>anubis-guard</id>
   <name>Anubis Guard</name>
   <description>Enable Anubis bot protection for individual websites, with path and IP exclusions.</description>
-  <version>0.8.2</version>
+  <version>0.8.3</version>
   <release>1</release>
   <plesk_min_version>18.0.81</plesk_min_version>
   <os>unix</os>

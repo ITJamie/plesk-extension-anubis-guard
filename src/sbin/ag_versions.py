@@ -21,6 +21,8 @@ from ag_runtime import atomic, durable_unlink, execute, USER, UnixConnection
 from ag_geoip import GeoIP, read_json
 
 REPO = "https://api.github.com/repos/TecharoHQ/anubis"
+RELEASE_PAGE_SIZE = 10
+MAX_API_RESPONSE = 8 * 1024 * 1024
 VERSION = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)")
 
 
@@ -41,8 +43,8 @@ def github(path, etag=None):
             def redirect_request(self, *args, **kwargs):
                 return None
         with urllib.request.build_opener(NoRedirect()).open(urllib.request.Request(REPO + path, headers=headers), timeout=20) as response:
-            body = response.read(2 * 1024 * 1024 + 1)
-            if len(body) > 2 * 1024 * 1024:
+            body = response.read(MAX_API_RESPONSE + 1)
+            if len(body) > MAX_API_RESPONSE:
                 raise GuardError("GitHub release response is too large")
             return json.loads(body), response.headers.get("ETag")
     except urllib.error.HTTPError as exc:
@@ -215,10 +217,14 @@ class Versions:
 
     def refresh(self, page):
         catalog = read_json(self.catalog_path, {"pages": {}})
+        # Page numbers and ETags depend on per_page. Discard the old pagination
+        # only after the replacement request succeeds, preserving it on failure.
+        if catalog.get("page_size") != RELEASE_PAGE_SIZE:
+            catalog = {"page_size": RELEASE_PAGE_SIZE, "pages": {}}
         previous = catalog["pages"].get(str(page), {})
-        releases, etag = github(f"/releases?per_page=50&page={page}", previous.get("etag"))
+        releases, etag = github(f"/releases?per_page={RELEASE_PAGE_SIZE}&page={page}", previous.get("etag"))
         if releases is not None:
-            if not isinstance(releases, list) or len(releases) > 50:
+            if not isinstance(releases, list) or len(releases) > RELEASE_PAGE_SIZE:
                 raise GuardError("Unexpected GitHub release list")
             records = []
             for release in releases:
@@ -226,7 +232,7 @@ class Versions:
                     records.append(release_record(release))
                 except GuardError:
                     continue
-            catalog["pages"][str(page)] = {"releases": records, "etag": etag, "has_more": len(releases) == 50}
+            catalog["pages"][str(page)] = {"releases": records, "etag": etag, "has_more": len(releases) == RELEASE_PAGE_SIZE}
         elif not previous:
             raise GuardError("GitHub returned an empty cache response")
         catalog["pages"][str(page)]["checked"] = int(time.time())

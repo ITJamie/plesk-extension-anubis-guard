@@ -18,11 +18,11 @@ Portable metadata checks always run. On a Plesk host, the same command also vali
 
 1. Set the new extension version in `src/meta.xml`. ZIP filenames use this value automatically. Update the panel asset versions in `src/plib/controllers/IndexController.php` when assets change, and update README example filenames as appropriate. The separate `runtime.lock.json` controls Anubis's default runtime, not the extension version.
 2. Add a nonempty `## VERSION — description` section to `CHANGELOG.md`. Complete local/Plesk staging checks, commit the changes, and push them. Wait for CI to pass.
-3. Push an annotated tag matching the metadata exactly. For example, if `src/meta.xml` contains `0.8.2`:
+3. Push an annotated tag matching the metadata exactly. For example, if `src/meta.xml` contains `0.8.3`:
 
 ```sh
-git tag -a v0.8.2 -m "Anubis Guard 0.8.2"
-git push origin v0.8.2
+git tag -a v0.8.3 -m "Anubis Guard 0.8.3"
+git push origin v0.8.3
 ```
 
 The **Release** workflow reruns CI on the tagged commit. Only after all checks and package builds pass does it validate the tag and changelog, rebuild the two packages, verify checksums, and create a published GitHub release. Release notes come from that version's changelog section. Attached files are:
@@ -41,7 +41,7 @@ A failed check or mismatched tag prevents publication. Fix failures before retry
 For a local preview of the exact release assets and notes, without publishing:
 
 ```sh
-python3 tools/release.py --tag v0.8.2
+python3 tools/release.py --tag v0.8.3
 ```
 
 Commit and push the workflow files before creating the first release tag. No release is created merely by pushing a branch or opening a pull request.

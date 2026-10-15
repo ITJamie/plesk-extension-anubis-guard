@@ -6,7 +6,7 @@ Only Plesk administrators can see or call the runtime management controls. This 
 
 Open Anubis Guard as administrator and find **Anubis runtime**.
 
-1. **Refresh releases** retrieves a page of official published stable releases from `TecharoHQ/anubis` on GitHub. Use **Load older releases** for more pages. Only Linux amd64 archives with GitHub SHA-256 asset digests are eligible; older releases without digests and prereleases are omitted.
+1. **Refresh releases** retrieves ten official published releases per page and lists eligible stable releases from `TecharoHQ/anubis` on GitHub. Use **Load older releases** for more pages. Only Linux amd64 archives with GitHub SHA-256 asset digests are eligible; older releases without digests and prereleases are omitted.
 2. Select a release and **Download selected release**. The background worker verifies the archive, extracts it safely, retains the complete upstream notices/assets, and records a per-file integrity manifest. Downloading does not restart sites or activate the binary.
 3. Select a downloaded version and **Activate downloaded runtime**. The worker checks its integrity and probes startup with the current policies and GeoIP settings before restarting active sites sequentially. An incompatible candidate is rejected before touching production services.
 4. **Use automatic** selects the exact version in the extension's `runtime.lock.json` (currently 1.28.1). It downloads the pinned archive if necessary. This does not follow GitHub's latest release. Future extension upgrades follow their new pin only in Automatic mode; an Override remains selected until explicitly changed.

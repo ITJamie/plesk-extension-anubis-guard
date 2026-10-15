@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.3 — GitHub release discovery
+
+- Request ten releases per page and allow bounded API responses up to 8 MiB so release discovery can handle upstream asset metadata and notes.
+- Refresh cached pagination and ETags when the page size changes, preserving the previous catalog on request failures.
+- Test large responses, the size limit, pagination after filtering, and cache migration.
+
 ## 0.8.2
 
 ci fixes
